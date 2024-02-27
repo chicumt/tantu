@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dao.StationDao">
+
+    <resultMap type="com.example.entity.Station" id="StationMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="area" column="area" jdbcType="VARCHAR"/>
+        <result property="detailArea" column="detail_area" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="apply" column="apply" jdbcType="INTEGER"/>
+        <result property="provinceId" column="province_id" jdbcType="INTEGER"/>
+        <result property="pieces" column="pieces" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="StationMap">
+        select
+          id, user_id, area, detail_area, status, apply, province_id
+        from station
+        where id = #{id}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="StationMap">
+        select
+          id, user_id, area, detail_area, status, apply, province_id
+        from station
+        <where>
+            <if test="station.id != null">
+                and id = #{station.id}
+            </if>
+            <if test="station.userId != null">
+                and user_id = #{station.userId}
+            </if>
+            <if test="station.area != null and station.area != ''">
+                and area = #{station.area}
+            </if>
+            <if test="station.detailArea != null and station.detailArea != ''">
+                and detail_area = #{station.detailArea}
+            </if>
+            <if test="station.status != null">
+                and status = #{station.status}
+            </if>
+            <if test="station.apply != null">
+                and apply = #{station.apply}
+            </if>
+            <if test="station.provinceId != null">
+                and province_id = #{station.provinceId}
+            </if>
+        </where>
+        limit #{page}, #{size}
+    </select>
+
+    <!--统计总行数-->
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from station
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="userId != null">
+                and user_id = #{userId}
+            </if>
+            <if test="area != null and area != ''">
+                and area = #{area}
+            </if>
+            <if test="detailArea != null and detailArea != ''">
+                and detail_area = #{detailArea}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="apply != null">
+                and apply = #{apply}
+            </if>
+            <if test="provinceId != null">
+                and province_id = #{provinceId}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into station(user_id, area, detail_area, province_id)
+        values ( #{userId}, #{area}, #{detailArea},  #{provinceId})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into station(id, user_id, area, detail_area, status, apply, province_id)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.id}, #{entity.userId}, #{entity.area}, #{entity.detailArea}, #{entity.status}, #{entity.apply}, #{entity.provinceId})
+        </foreach>
+    </insert>
+
+
+    <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into station(id, user_id, area, detail_area, status, apply, province_id)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.id}, #{entity.userId}, #{entity.area}, #{entity.detailArea}, #{entity.status}, #{entity.apply}, #{entity.provinceId})
+        </foreach>
+        on duplicate key update
+        id = values(id),
+        user_id = values(user_id),
+        area = values(area),
+        detail_area = values(detail_area),
+        status = values(status),
+        apply = values(apply),
+        province_id = values(province_id)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update station
+        <set>
+            <if test="id != null">
+                id = #{id},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId},
+            </if>
+            <if test="area != null and area != ''">
+                area = #{area},
+            </if>
+            <if test="detailArea != null and detailArea != ''">
+                detail_area = #{detailArea},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="apply != null">
+                apply = #{apply},
+            </if>
+            <if test="provinceId != null">
+                province_id = #{provinceId},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from station where id = #{id}
+    </delete>
+    <!-- 新添加的查询 -->
+    <select id="selectBatch" resultMap="StationMap">
+        select
+          id, user_id, area, detail_area, status, apply, province_id
+        from station
+        where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+        #{id}
+        </foreach>
+    </select>
+    <select id="selectAllId" resultType="com.example.entity.Station">
+        select id,province_id,pieces from
+        station where status=1 and apply=1
+    </select>
+    <select id="selectStationIdbyId" resultType="java.lang.Long">
+        select id
+        from  station
+        where user_id=#{id}
+    </select>
+    <select id="queryAllByLimitJoin" resultType="com.example.entity.Station">
+        select
+        station.id, user_id, area, detail_area, status, apply, province_id, pieces, SUM(eletric.mount) as total, SUM(eletric.profit) as profit
+        from station left join eletric on station.id = eletric.station_id
+        <where>
+            <if test="station.id != null">
+                and station.id = #{station.id}
+            </if>
+            <if test="station.userId != null">
+                and station.user_id = #{station.userId}
+            </if>
+            <if test="station.area != null and station.area != ''">
+                and station.area = #{station.area}
+            </if>
+            <if test="station.detailArea != null and station.detailArea != ''">
+                and station.detail_area = #{station.detailArea}
+            </if>
+            <if test="station.status != null">
+                and station.status = #{station.status}
+            </if>
+            <if test="station.apply != null">
+                and station.apply = #{station.apply}
+            </if>
+            <if test="station.provinceId != null">
+                and station.province_id = #{station.provinceId}
+            </if>
+        </where>
+        group by station.id
+    </select>
+
+</mapper>
+

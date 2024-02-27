@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/tantu
+    username: root
+    password: 123456
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath:mapper/**/*.xml
+jwt:
+  # ??jwt??????????
+  admin-secret-key: dzqq
+  # ??jwt????
+  admin-ttl: 720000000
+  # ?????????????
+  admin-token-name: token
+  # jwt????
+  current-user: current-user
+
+captcha:
+  length: 6
+  width: 200
+  heigth: 100
+
+email:
+  host: smtp.qq.com
+  password: kukhtwaxqkgsjhed
+  send-email: 1501482787@qq.com
+server:
+  port: 8082
